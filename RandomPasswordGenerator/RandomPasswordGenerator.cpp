@@ -17,9 +17,9 @@ string randomPassword(int size);
 
 int main() {
 
-	setlocale(LC_ALL, "Russian");
+	typedef std::chrono::high_resolution_clock hiclock;
 
-	srand(time(NULL));
+	setlocale(LC_ALL, "Russian");
 
 	int size;
 
@@ -60,10 +60,33 @@ int main() {
 
 string randomString(int size, string base) {
 
+	std::random_device dev;
+
+	seed_seq seed
+	{
+		static_cast<long long>(std::chrono::high_resolution_clock::now()
+								   .time_since_epoch()
+								   .count()),
+
+		static_cast<long long>(dev()),
+		static_cast<long long>(dev()),
+		static_cast<long long>(dev()),
+		static_cast<long long>(dev()),
+		static_cast<long long>(dev()),
+		static_cast<long long>(dev()),
+
+		static_cast<long long>(
+			std::hash<std::thread::id>()(std::this_thread::get_id()))
+
+	};
+
+	mt19937 gen(seed);
+	std::uniform_int_distribution<> dist(0, base.length() - 1);
+
 	string str = "";
 
 	for (int i = 0; i < size; i++) {
-		int random = rand() % base.length();
+		int random = dist(gen);
 
 		str += base.at(random);
 	}
